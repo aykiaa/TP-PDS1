@@ -52,7 +52,7 @@ int calcular_distancia(Casa casa, Restaurante restaurante, Rua *ruas_pavimentada
     Esquina fila[897];
     int inicio_fila = 0; //primeiro elemento da fila para ser consultado
     int final_fila = 0; //coloca na ultima posicao 
-    bool visitado[39][23]= {false}; //crio uma matriz para guardar se uma esquina ja foi vista ou nao, alem disso 39x23 porque essa eh a ultima rua/esquina 
+    bool visitado[40][24]= {false}; //crio uma matriz para guardar se uma esquina ja foi vista ou nao, alem disso 39x23 porque essa eh a ultima rua/esquina 
 
     Esquina esquina_inicial; //Ponto de inicio da pesquisa do caminho a partir da casa do usuario
     esquina_inicial.x = casa.x;
@@ -111,7 +111,7 @@ int calcular_distancia(Casa casa, Restaurante restaurante, Rua *ruas_pavimentada
                     if (vizinho.x == ruas_pavimentadas[j].x && vizinho.y == ruas_pavimentadas[j].y)
                     {
                         caminho_valido = true; //valido o caminho
-                        break; // e saio do for
+                        break; 
                     }
                 }
 
@@ -161,6 +161,7 @@ int main()
     int cont_rest_barato = 0;
     Rua ruas_pavimentadas[450];
     int cont_pavimentadas = 0;
+
     
     // Contabilizando as ruas
     while(!feof(f_ruas))
@@ -172,13 +173,19 @@ int main()
     //Contabilizando os restaurantes
     while (!feof(f_restaurantes))
     {
-        fscanf(f_restaurantes, "%d %d %s %s %d", &restaurantes_cidade[cont_rest].x, &restaurantes_cidade[cont_rest].y, &restaurantes_cidade[cont_rest].nome, &restaurantes_cidade[cont_rest].custo, &restaurantes_cidade[cont_rest].velocidade);
-        if (restaurantes_cidade[cont_rest].custo == "Caro")
+        fscanf(f_restaurantes, "%d %d %s %s %d", &restaurantes_cidade[cont_rest].x, &restaurantes_cidade[cont_rest].y, restaurantes_cidade[cont_rest].nome, &restaurantes_cidade[cont_rest].custo, &restaurantes_cidade[cont_rest].velocidade);
+        
+        if (strcmp(restaurantes_cidade[cont_rest].custo, "Caro") == 0)
         {
             cont_rest_caro++;
+            cont_rest++; 
         }
-        else cont_rest_barato++;
-        cont_rest++;    
+        else
+        {
+            cont_rest_barato++;
+            cont_rest++;
+        }
+   
     }
     
     
@@ -192,37 +199,42 @@ int main()
         }
     }
     
-    for (int i = 0; i < cont_pavimentadas; i++)
-    {
-        printf("%d %d %d\n", ruas_pavimentadas[i].x, ruas_pavimentadas[i].y, ruas_pavimentadas[i].pavimentado);
-    }
-    for (int i = 0; i < cont_rest-1; i++)
-    {
-        printf("%d %d %s %s %d\n", restaurantes_cidade[i].x, restaurantes_cidade[i].y, restaurantes_cidade[i].nome, restaurantes_cidade[i].custo, restaurantes_cidade[i].velocidade);
-    }
-
-
-
-
-
-    printf("Ruas: %d\n", cont_ruas);
-    printf("Ruas pav: %d\n", cont_pavimentadas);
 
     Casa casa_user;
+    int menu = 0;
+    int tempo_de_espera;
     printf("Digite as coordernadas de sua casa: \n");
     printf("X:\n"); scanf("%d", &casa_user.x);
     printf("Y:\n"); scanf("%d", &casa_user.y);
-    printf("Qual sua preferencia de custo?\n[1]Caro \n[2]Barato\n"); scanf("%d", &casa_user.custo); // 1 para CARO; 2 para BARATO
+    int status = 0001; //erro se a rua nao eh pavimentada
     
     //Verifica se a casa do usuario esta em uma rua pavimentada
+    
     for (int i = 0; i < cont_ruas; i++)
     {
-        if (ruas_cidade[i].x == casa_user.x && ruas_cidade[i].y == casa_user.y && ruas_cidade[i].pavimentado == 0)
+        if (casa_user.x >= 0 && casa_user.x <= 39 && casa_user.y >= 0 && casa_user.y <= 23)
         {
-            printf("Sua casa nao esta em uma area pavimentada\n");
-            break;
+            if (ruas_cidade[i].x == casa_user.x && ruas_cidade[i].y == casa_user.y && ruas_cidade[i].pavimentado == 0)
+            {
+                printf("Sua casa nao esta em uma area pavimentada\n");
+                exit(status);
+            }
+        }
+        else
+        {
+            printf("Sua rua esta fora dos limites da cidade\n");
+            exit(status);
         }
     }
+    printf("Qual sua preferencia de custo?\n[1]Caro \n[2]Barato\n"); scanf("%d", &casa_user.custo); // 1 para CARO; 2 para BARATO
+    printf("Deseja definir um tempo maximo de espera?\n[1]Sim\n[2]Nao\n"); scanf("%d", &menu); //1 COM TEMPO MAXIMO //2 SEM TEMPO MAXIMO
+    
+    if(menu == 1)
+    {
+        printf("Digite o tempo maximo de espera: \n"); scanf("%d", &tempo_de_espera);
+    }
+
+
     
     //printf("Distancias da sua casa aos restaurantes:\n");
     
@@ -232,44 +244,109 @@ int main()
         restaurantes_cidade[i].tempo_de_entrega = distancia/restaurantes_cidade[i].velocidade;
     }
     
+    Restaurante entregas_caras[cont_rest_caro];
+    int cont_entregas_caro = 0;
 
-    switch (casa_user.custo) //Mostra as opcoes de restaurantes a partir da preferencia (caro ou barato) do usuario
+    Restaurante entregas_baratas[cont_rest_barato];
+    int cont_entregas_barato = 0;
+    
+    for (int i = 0; i < cont_rest; i++) //Armazeno entregas dos restaurantes caros no array entregas_caras
     {
-    case 1:
-        for (int i = 0; i < cont_rest; i++)
-        {
-            if(stricmp(restaurantes_cidade[i].custo, "Caro") == 0) //comparo as strings, para printar somente restaurantes CAROS
-            {
-                printf("%s -> Tempo de entrega: %.2f\n", restaurantes_cidade[i].nome, restaurantes_cidade[i].tempo_de_entrega);
-            }
+        if (strcmp(restaurantes_cidade[i].custo, "Caro") == 0) //comparo as strings, para armazena no array somente restaurantes CAROS
+        { 
+            entregas_caras[cont_entregas_caro] = restaurantes_cidade[i];
+            cont_entregas_caro++;
         }
-        break;
-    case 2:
-        for (int i = 0; i < cont_rest; i++)
-        {
-            if (strcmp(restaurantes_cidade[i].custo, "Barato") == 0)
-            {
-                printf("%s: Tempo de entrega: %.2f\n", restaurantes_cidade[i].nome, restaurantes_cidade[i].tempo_de_entrega);
-            }
-        }
-        break;
     }
-    
-    
-    
-    
-    /*for (int i = 0; i < cont_rest-1; i++)
+    //Ordenar os tempos de entregas
+    for (int k = 0; k < cont_entregas_caro; k++)
     {
-        int distancia = calcular_distancia(casa_user, restaurantes_cidade[i], ruas_pavimentadas, cont_pavimentadas);
-        printf("A distancia da sua casa ate o restaurante %s eh %d zambs.\n", restaurantes_cidade[i].nome, distancia);
-    }*/
+        for (int j = k; j < cont_entregas_caro; j++)
+        {
+            if (entregas_caras[k].tempo_de_entrega > entregas_caras[j].tempo_de_entrega)
+            {
+                Restaurante teste = entregas_caras[k];
+                entregas_caras[k] = entregas_caras[j];
+                entregas_caras[j] = teste;
+            }
+        }
+    }  
+
+    for (int i = 0; i < cont_rest; i++)
+    {
+        if (strcmp(restaurantes_cidade[i].custo, "Barato") == 0)
+        {
+            entregas_baratas[cont_entregas_barato] = restaurantes_cidade[i];
+            cont_entregas_barato++;
+        }
+    }
+    for (int k = 0; k < cont_entregas_barato; k++)
+    {
+        for (int j = k; j < cont_entregas_barato; j++)
+        {
+            if (entregas_baratas[k].tempo_de_entrega > entregas_baratas[j].tempo_de_entrega)
+            {
+                Restaurante teste = entregas_baratas[k];
+                entregas_baratas[k] = entregas_baratas[j];
+                entregas_baratas[j] = teste;
+            }
+        }
+    }
 
 
 
-    
 
 
-    
+    switch (menu) //1 COM TEMPO MAXIMO //2 SEM TEMPO MAXIMO
+    {
+        case 2:
+            switch (casa_user.custo) //Mostra as opcoes de restaurantes a partir da preferencia (caro ou barato) do usuario
+            {
+            case 1:  //caro
+                for (int i = 0; i < cont_entregas_caro-1; i++)
+                {
+                    printf("%s -> Tempo de entrega: %.2f\n", entregas_caras[i].nome, entregas_caras[i].tempo_de_entrega);
+                }
+                break;
+            case 2: // barato
+                for (int i = 0; i < cont_entregas_barato; i++)
+                {
+                    printf("%s -> Tempo de entrega: %.2f\n", entregas_baratas[i].nome, entregas_baratas[i].tempo_de_entrega);
+                }
+                break;
+            default:
+                printf("Digite um valor valido!\n"); 
+            }
+            break;
+        case 1:
+            switch (casa_user.custo)
+            {
+            case 1:
+                for (int i = 0; i < cont_entregas_caro; i++)
+                {
+                    if (entregas_caras[i].tempo_de_entrega <= tempo_de_espera)
+                    {
+                        printf("%s -> Tempo de entrega: %.2f\n", entregas_caras[i].nome, entregas_caras[i].tempo_de_entrega);
+                    }
+                }
+                break;
+            case 2:
+                for (int i = 0; i < cont_entregas_barato; i++)
+                {
+                    if (entregas_baratas[i].tempo_de_entrega <= tempo_de_espera)
+                    {
+                        printf("%s -> Tempo de entrega: %.2f\n", entregas_baratas[i].nome, entregas_baratas[i].tempo_de_entrega);
+                    }
+                }   
+                break;
+            default:
+                break;
+            }
+            break;
+    }
+
+
+
     fclose(f_ruas);
     fclose(f_restaurantes);
     return 0;
