@@ -46,6 +46,7 @@ bool is_adjacente(Rua rua1, Rua rua2) //determinar se duas ruas sao adjacentes o
     else return false;
 
 }
+
 int calcular_distancia(Casa casa, Restaurante restaurante, Rua *ruas_pavimentadas, int num_ruas_pavimentadas)
 {
 
@@ -55,18 +56,19 @@ int calcular_distancia(Casa casa, Restaurante restaurante, Rua *ruas_pavimentada
     bool visitado[40][24]= {false}; //crio uma matriz para guardar se uma esquina ja foi vista ou nao, alem disso 39x23 porque essa eh a ultima rua/esquina 
 
     Esquina esquina_inicial; //Ponto de inicio da pesquisa do caminho a partir da casa do usuario
-    esquina_inicial.x = casa.x;
-    esquina_inicial.y = casa.y;
+    esquina_inicial.x = casa.x;  
+    esquina_inicial.y = casa.y;  
     esquina_inicial.distancia = 0;
 
+    
     fila[final_fila] = esquina_inicial; //primeira esquina entra na fila para ser verificada
     final_fila++;
     visitado[casa.x][casa.y]= true; // crio uma matriz para guardar se uma esquina ja foi vista ou nao
 
     while (inicio_fila != final_fila) // enquanto a fila for tendo elementos diferentes, ela continua rodando
     {
-        Esquina atual = fila[inicio_fila];
-        inicio_fila++;
+        Esquina atual = fila[inicio_fila];  
+        inicio_fila++; 
 
         if (atual.x == restaurante.x && atual.y == restaurante.y) //quando chegar no resturante retorna a distancia 
         {
@@ -216,23 +218,31 @@ int main()
         {
             if (ruas_cidade[i].x == casa_user.x && ruas_cidade[i].y == casa_user.y && ruas_cidade[i].pavimentado == 0)
             {
-                printf("Sua casa nao esta em uma area pavimentada\n");
-                exit(status);
+                printf("Sua casa nao esta em uma area pavimentada.\n");
+                return 1;
             }
         }
         else
         {
             printf("Sua rua esta fora dos limites da cidade\n");
-            exit(status);
+            return 1;
         }
     }
     printf("Qual sua preferencia de custo?\n[1]Caro \n[2]Barato\n"); scanf("%d", &casa_user.custo); // 1 para CARO; 2 para BARATO
+    
+    if (casa_user.custo != 1 && casa_user.custo != 2)
+    {
+        printf("Digite um valor valido.\n");
+        return 1;
+    }
+    
     printf("Deseja definir um tempo maximo de espera?\n[1]Sim\n[2]Nao\n"); scanf("%d", &menu); //1 COM TEMPO MAXIMO //2 SEM TEMPO MAXIMO
     
     if(menu == 1)
     {
         printf("Digite o tempo maximo de espera: \n"); scanf("%d", &tempo_de_espera);
     }
+
 
 
     
@@ -305,17 +315,18 @@ int main()
             case 1:  //caro
                 for (int i = 0; i < cont_entregas_caro-1; i++)
                 {
-                    printf("%s -> Tempo de entrega: %.2f\n", entregas_caras[i].nome, entregas_caras[i].tempo_de_entrega);
+                    printf("%s -> Tempo de entrega: %.2f minutos\n", entregas_caras[i].nome, entregas_caras[i].tempo_de_entrega);
                 }
                 break;
             case 2: // barato
                 for (int i = 0; i < cont_entregas_barato; i++)
                 {
-                    printf("%s -> Tempo de entrega: %.2f\n", entregas_baratas[i].nome, entregas_baratas[i].tempo_de_entrega);
+                    printf("%s -> Tempo de entrega: %.2fminutos\n", entregas_baratas[i].nome, entregas_baratas[i].tempo_de_entrega);
                 }
                 break;
             default:
                 printf("Digite um valor valido!\n"); 
+                break;
             }
             break;
         case 1:
