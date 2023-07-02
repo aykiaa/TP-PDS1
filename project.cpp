@@ -208,10 +208,8 @@ int main()
     printf("Digite as coordernadas de sua casa: \n");
     printf("X:\n"); scanf("%d", &casa_user.x);
     printf("Y:\n"); scanf("%d", &casa_user.y);
-    int status = 0001; //erro se a rua nao eh pavimentada
     
     //Verifica se a casa do usuario esta em uma rua pavimentada
-    
     for (int i = 0; i < cont_ruas; i++)
     {
         if (casa_user.x >= 0 && casa_user.x <= 39 && casa_user.y >= 0 && casa_user.y <= 23)
@@ -236,7 +234,7 @@ int main()
         return 1;
     }
     
-    printf("Deseja definir um tempo maximo de espera?\n[1]Sim\n[2]Nao\n"); scanf("%d", &menu); //1 COM TEMPO MAXIMO //2 SEM TEMPO MAXIMO
+    printf("Deseja definir um tempo maximo de espera?\n[1]Sim \n[2]Nao\n"); scanf("%d", &menu); //1 COM TEMPO MAXIMO //2 SEM TEMPO MAXIMO
     
     if(menu == 1)
     {
@@ -268,6 +266,8 @@ int main()
             cont_entregas_caro++;
         }
     }
+    
+    
     //Ordenar os tempos de entregas
     for (int k = 0; k < cont_entregas_caro; k++)
     {
